@@ -2,9 +2,8 @@
 
 # ==============================================================================
 # Project: Lightweight Docker Environment Setup (Dockge + CF Tunnel)
-# Author: [Your Name/GitHub Username]
 # Description: 专为 1H1G 小内存 VPS 设计的 Docker 自动化部署脚本
-# Version: 2.0
+# Version: 2.1 (Fix pipe installation interaction)
 # ==============================================================================
 
 # --- 颜色定义 ---
@@ -114,7 +113,8 @@ function configure_tunnel() {
     fi
 
     echo "请去 Cloudflare Zero Trust -> Access -> Tunnels 获取 Token。"
-    read -p "请输入 Token (eyJh...): " cf_token
+    # 修复点：增加 < /dev/tty
+    read -p "请输入 Token (eyJh...): " cf_token < /dev/tty
     
     if [ -z "$cf_token" ]; then
         echo -e "${RED}Token 为空，操作取消。${NC}"
@@ -153,7 +153,8 @@ function uninstall_all() {
     echo "1. 删除 Dockge 及所有相关数据 (/opt/dockge, /opt/stacks)"
     echo "2. 停止相关容器"
     echo ""
-    read -p "确定要继续吗? [y/N] " confirm
+    # 修复点：增加 < /dev/tty
+    read -p "确定要继续吗? [y/N] " confirm < /dev/tty
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         echo "已取消。"
         return
@@ -167,7 +168,8 @@ function uninstall_all() {
     rm -rf "$STACKS_DIR"
     echo -e "${GREEN}面板及数据目录已清除。${NC}"
 
-    read -p "是否连同 Docker 引擎一起卸载? (适合重装系统前清理) [y/N] " remove_docker
+    # 修复点：增加 < /dev/tty
+    read -p "是否连同 Docker 引擎一起卸载? (适合重装系统前清理) [y/N] " remove_docker < /dev/tty
     if [[ "$remove_docker" =~ ^[Yy]$ ]]; then
         apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
         rm -rf /var/lib/docker
@@ -179,14 +181,16 @@ function uninstall_all() {
 show_menu() {
     clear
     echo -e "${BLUE}=========================================${NC}"
-    echo -e "${BLUE}    1H1G VPS 极简部署助手 v2.0    ${NC}"
+    echo -e "${BLUE}    1H1G VPS 极简部署助手 v2.1    ${NC}"
     echo -e "${BLUE}=========================================${NC}"
     echo -e "1. ${GREEN}一键安装${NC} (Swap + Docker + Dockge)"
     echo -e "2. ${YELLOW}配置 CF Tunnel${NC} (内网穿透)"
     echo -e "3. ${RED}卸载/清理${NC} (环境重置)"
     echo -e "0. 退出"
     echo -e "${BLUE}=========================================${NC}"
-    read -p "请输入选项 [0-3]: " choice
+    
+    # 修复点：增加 < /dev/tty
+    read -p "请输入选项 [0-3]: " choice < /dev/tty
     
     case $choice in
         1) install_dockge ;;
@@ -201,5 +205,6 @@ check_root
 while true; do
     show_menu
     echo ""
-    read -p "按回车键返回菜单..."
+    # 修复点：增加 < /dev/tty
+    read -p "按回车键返回菜单..." dummy < /dev/tty
 done
